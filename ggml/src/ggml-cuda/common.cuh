@@ -269,9 +269,10 @@ static const char * cu_get_error_str(CUresult err) {
 #define FP16_AVAILABLE
 #endif // defined(GGML_USE_HIP) || defined(GGML_USE_MUSA) || __CUDA_ARCH__ >= GGML_CUDA_CC_PASCAL
 
-#if defined(FP16_AVAILABLE) && __CUDA_ARCH__ != 610
+#if defined(FP16_AVAILABLE) && __CUDA_ARCH__ != 610 && __CUDA_ARCH__ != 600
 #define FAST_FP16_AVAILABLE
-#endif // defined(FP16_AVAILABLE) && __CUDA_ARCH__ != 610
+#endif // defined(FP16_AVAILABLE) && __CUDA_ARCH__ != 610 && __CUDA_ARCH__ != 600
+
 
 #if defined(GGML_USE_HIP) && defined(CDNA) && !defined(GGML_HIP_NO_MMQ_MFMA)
 #define AMD_MFMA_AVAILABLE
