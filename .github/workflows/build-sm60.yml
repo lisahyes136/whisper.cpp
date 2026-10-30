@@ -5,19 +5,25 @@ jobs:
   build:
     runs-on: windows-2022
     steps:
-      - name: Checkout fork source
+      - name: Checkout source (your forked whisper.cpp)
         uses: actions/checkout@v4
 
+      # 替换废弃的 ilammy/msvc-dev-cmd
       - name: Setup MSVC x64
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: step-security/msvc-dev-cmd@v1
         with:
           arch: x64
 
+      # 手动下载+静默安装 CUDA 11.8 (windows)
       - name: Install CUDA 11.8
-        uses: shiguredo/github-actions/.github/actions/setup-cuda-toolkit@main
-        with:
-          cuda_version: 11.8
-          platform: windows-2022
+        shell: pwsh
+        run: |
+          $cudaInstaller = "cuda_11.8.0_522.06_windows.exe"
+          $url = "https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/$cudaInstaller"
+          Invoke-WebRequest -Uri $url -OutFile $cudaInstaller
+          .\$cudaInstaller -s nvcc_11.8 cublas_dev_11.8
+          echo "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
       - name: CMake configure & build
         shell: pwsh
