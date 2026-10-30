@@ -1,0 +1,36 @@
+name: Build ggml-cuda.dll sm60 for P100 (v1.9.4 927cfce)
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout fork source
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC x64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install CUDA 11.8
+        uses: shiguredo/github-actions/.github/actions/setup-cuda-toolkit@main
+        with:
+          cuda_version: 11.8
+          platform: windows-2022
+
+      - name: CMake configure & build
+        shell: pwsh
+        run: |
+          cmake -B build `
+            -DGGML_CUDA=ON `
+            -DCMAKE_CUDA_ARCHITECTURES="60-virtual;61;70;75;80;86" `
+            -DWHISPER_BUILD_TESTS=OFF `
+            -DWHISPER_BUILD_EXAMPLES=OFF
+          cmake --build build --config Release -j
+
+      - name: Upload ggml-cuda.dll
+        uses: actions/upload-artifact@v4
+        with:
+          name: ggml-cuda-sm60-p100
+          path: build/Release/ggml-cuda.dll
